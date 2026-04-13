@@ -139,5 +139,18 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 
-shoes.db
+# ===== Project Specific =====
+
+# Database
 *.db
+
+# Uploads (user images)
+uploads/
+public/uploads/
+
+# Environment variables
+.env
+.env.*
+
+# Node modules (already above but safe)
+node_modules/
