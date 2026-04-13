@@ -1,0 +1,5 @@
+node_modules/
+shoes.db
+public/uploads/
+.env
+uploads/

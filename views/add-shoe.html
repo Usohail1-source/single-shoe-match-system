@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Single Shoe — Single Shoe Match System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .add-shoe-page { display: flex; min-height: 100vh; }
+
+    /* ---- Sidebar ---- */
+    .add-shoe-sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+    }
+
+    .add-shoe-sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.4;
+    }
+
+    .sidebar-brand {
+      padding: 22px 20px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-brand-name {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .sidebar-nav { flex: 1; padding: 14px 0; }
+
+    .sidebar-nav-section { padding: 0 12px; }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all var(--transition);
+    }
+
+    .sidebar-nav a:hover { color: var(--text-primary); background: var(--surface-2); }
+    .sidebar-nav a.active { color: var(--accent); background: var(--accent-dim); }
+    .sidebar-nav a .nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+    .sidebar-nav a[href="/add"] .nav-icon { color: var(--red); }
+
+    .sidebar-footer {
+      padding: 14px 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-footer a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--red);
+      text-decoration: none;
+      transition: all var(--transition);
+    }
+
+    .sidebar-footer a:hover { background: var(--red-dim); }
+
+    /* ---- Main ---- */
+    .add-shoe-main {
+      flex: 1;
+      margin-left: 220px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .add-shoe-topbar {
+      height: 52px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      background: rgba(8,8,9,0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .secure-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ---- Content ---- */
+    .add-shoe-content {
+      padding: 40px 52px 80px;
+      max-width: 760px;
+    }
+
+    /* Page header */
+    .form-page-header {
+      margin-bottom: 36px;
+    }
+
+    .form-page-header h1 {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .form-page-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Section blocks — each group is its own card */
+    .form-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .form-section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .form-section-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-3);
+      border: 1px solid var(--border-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .form-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .form-section-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Two-column row inside section */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 0;
+    }
+
+    .form-row + .form-row {
+      margin-top: 20px;
+    }
+
+    .form-row .field { display: flex; flex-direction: column; }
+    .form-row .field label { margin-top: 0; }
+
+    /* Global label override inside form */
+    .form-section label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 8px;
+      margin-top: 24px;
+      display: block;
+    }
+
+    .form-section .form-row label { margin-top: 0; }
+
+    .form-section input[type="text"],
+    .form-section input[type="number"],
+    .form-section input[type="file"],
+    .form-section select {
+      font-size: 15px;
+      font-weight: 500;
+      padding: 12px 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      width: 100%;
+      outline: none;
+      font-family: var(--font-body);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-section input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .form-section input:focus,
+    .form-section select:focus {
+      border-color: rgba(200,240,80,0.45);
+      box-shadow: 0 0 0 3px rgba(200,240,80,0.08);
+    }
+
+    .form-section select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23606070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 34px;
+      cursor: pointer;
+    }
+
+    .form-section select option { background: var(--surface-2); }
+
+    /* Condition selector */
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .toggle-group input[type="radio"] { display: none; }
+
+    .toggle-group label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0;
+      padding: 12px 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+      text-align: center;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .toggle-group input[type="radio"]:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .toggle-group label:hover {
+      border-color: var(--border-3);
+      color: var(--text-primary);
+      background: var(--surface-3);
+    }
+
+    .toggle-label { font-size: 14px; }
+
+    /* Image preview */
+    .image-preview-wrap {
+      margin-top: 12px;
+      display: none;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .image-preview-wrap img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Submit */
+    .form-submit-wrap {
+      margin-top: 8px;
+    }
+
+    .form-submit-wrap button {
+      width: 100%;
+      justify-content: center;
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      letter-spacing: -0.01em;
+    }
+
+    .form-hint {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .add-shoe-sidebar { display: none; }
+      .add-shoe-main { margin-left: 0; }
+      .add-shoe-content { padding: 20px 16px 60px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="add-shoe-page">
+
+  <!-- Sidebar -->
+  <aside class="add-shoe-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">Single Shoe Match System</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-section">
+        <a href="/network"><span class="nav-icon">◈</span> Home</a>
+        <a href="/unmatched"><span class="nav-icon">◎</span> Single Shoes</a>
+        <a href="/awaiting-confirmation"><span class="nav-icon">◷</span> Awaiting Confirmation</a>
+        <a href="/add" class="active"><span class="nav-icon">+</span> Add Single Shoe</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/logout">⎋ &nbsp;Log Out</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="add-shoe-main">
+
+    <div class="add-shoe-topbar">
+      <span class="topbar-title">Add Single Shoe</span>
+      <div class="topbar-right">
+        <div class="secure-dot"></div>
+        Network Active
+      </div>
+    </div>
+
+    <div class="add-shoe-content">
+
+      <div class="form-page-header">
+        <h1>Add Single Shoe</h1>
+        <p>Post a shoe to the network — we'll check for a matching pair the moment it's submitted.</p>
+      </div>
+
+      <form method="POST" action="/add-shoe" enctype="multipart/form-data">
+
+        <!-- Brand & Model -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-icon">👟</div>
+            <div class="form-section-title">Brand & Model</div>
+          </div>
+          <div class="form-section-body">
+            <div class="form-row">
+              <div class="field">
+                <label for="brand">Brand</label>
+                <select id="brand" name="brand" required>
+                  <option value="">Select brand</option>
+                  <option value="nike">Nike</option>
+                  <option value="adidas">Adidas</option>
+                  <option value="jordan">Jordan</option>
+                  <option value="new balance">New Balance</option>
+                  <option value="puma">Puma</option>
+                  <option value="reebok">Reebok</option>
+                  <option value="vans">Vans</option>
+                  <option value="converse">Converse</option>
+                  <option value="asics">ASICS</option>
+                  <option value="under armour">Under Armour</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="model">Model</label>
+                <input type="text" id="model" name="model" placeholder="e.g. Air Max 90" required>
+              </div>
+            </div>
+            <label for="sku">SKU <span style="color:var(--text-faint);font-size:9px;letter-spacing:0.06em;">OPTIONAL</span></label>
+            <input type="text" id="sku" name="sku" placeholder="e.g. CZ5483-101">
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-icon">📋</div>
+            <div class="form-section-title">Shoe Details</div>
+          </div>
+          <div class="form-section-body">
+            <div class="form-row">
+              <div class="field">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" required>
+                  <option value="">Select</option>
+                  <option value="men">Men</option>
+                  <option value="women">Women</option>
+                  <option value="kids">Kids</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="side">Side</label>
+                <select id="side" name="side" required>
+                  <option value="">Select</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="size">Size</label>
+                <input type="number" id="size" name="size" placeholder="e.g. 10.5" step="0.5" min="1" required>
+              </div>
+              <div class="field">
+                <label for="color">Color</label>
+                <input type="text" id="color" name="color" placeholder="e.g. Black / White" required>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Condition & Pricing -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-icon">🏷️</div>
+            <div class="form-section-title">Condition & Pricing</div>
+          </div>
+          <div class="form-section-body">
+
+            <label style="margin-top:0;">Condition</label>
+            <div class="toggle-group">
+              <div>
+                <input type="radio" id="cond-new" name="condition" value="new" checked>
+                <label for="cond-new">✨ <span class="toggle-label">New</span></label>
+              </div>
+              <div>
+                <input type="radio" id="cond-worn" name="condition" value="worn">
+                <label for="cond-worn">👟 <span class="toggle-label">Worn</span></label>
+              </div>
+            </div>
+
+            <label>Price Type</label>
+            <div class="toggle-group" style="margin-bottom:16px;">
+              <div>
+                <input type="radio" id="pt-original" name="price_type" value="original" checked>
+                <label for="pt-original"><span class="toggle-label">Original Price</span></label>
+              </div>
+              <div>
+                <input type="radio" id="pt-sale" name="price_type" value="sale">
+                <label for="pt-sale"><span class="toggle-label">Sale Price</span></label>
+              </div>
+            </div>
+
+            <label for="original_price">Price ($)</label>
+            <input type="number" id="original_price" name="original_price" placeholder="0.00" step="0.01" min="0" required>
+
+          </div>
+        </div>
+
+        <!-- Photo -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-icon">📷</div>
+            <div class="form-section-title">Photo <span style="font-size:10px;color:var(--text-faint);font-weight:400;letter-spacing:0.06em;text-transform:uppercase;margin-left:6px;">Optional</span></div>
+          </div>
+          <div class="form-section-body">
+            <input type="file" id="shoe_image" name="shoe_image" accept="image/*" onchange="previewImage(this)" style="margin-top:0;">
+            <div class="image-preview-wrap" id="imagePreview">
+              <img id="previewImg" src="" alt="Preview">
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="form-submit-wrap">
+          <button type="submit">Post to Network →</button>
+          <p class="form-hint">Match detection runs automatically on submission</p>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function previewImage(input) {
+    const wrap = document.getElementById('imagePreview');
+    const img = document.getElementById('previewImg');
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        img.src = e.target.result;
+        wrap.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html>

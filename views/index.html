@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single Match System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Nav */
+    .landing-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 52px;
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .landing-nav-brand {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .landing-nav-links {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-link-plain {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 7px 16px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-2);
+      transition: all 0.15s;
+    }
+
+    .nav-link-plain:hover {
+      color: var(--text-primary);
+      border-color: var(--border-3);
+      background: var(--surface);
+    }
+
+    .nav-link-accent {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 700;
+      color: #080809;
+      background: var(--accent);
+      text-decoration: none;
+      padding: 7px 18px;
+      border-radius: var(--radius-xs);
+      transition: all 0.15s;
+    }
+
+    .nav-link-accent:hover {
+      background: #d4f860;
+      transform: translateY(-1px);
+    }
+
+    /* Hero */
+    .landing-hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px 60px;
+      text-align: center;
+      position: relative;
+    }
+
+    /* Ambient glow */
+    .landing-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(200,240,80,0.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .landing-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-h1 {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 8vw, 96px);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.04em;
+      color: var(--text-primary);
+      margin-bottom: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .landing-sub-tag {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.01em;
+      margin-top: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-sub {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 24px auto 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-ctas {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-main {
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 700;
+      color: #080809;
+      background: var(--accent);
+      text-decoration: none;
+      padding: 14px 36px;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+
+    .btn-main:hover {
+      background: #d4f860;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(200,240,80,0.22);
+    }
+
+    .btn-ghost {
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 14px 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      transition: all 0.15s;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text-primary);
+      border-color: var(--border-3);
+      background: var(--surface);
+    }
+
+    /* Feature strip */
+    .landing-strip {
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      flex-shrink: 0;
+    }
+
+    .strip-item {
+      padding: 28px 36px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .strip-item:last-child { border-right: none; }
+
+    .strip-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      opacity: 0.85;
+    }
+
+    .strip-text h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .strip-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .landing-footer {
+      border-top: 1px solid var(--border);
+      padding: 0 52px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .landing-footer p {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    @media (max-width: 720px) {
+      .landing-strip { grid-template-columns: 1fr; }
+      .strip-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .strip-item:last-child { border-bottom: none; }
+      .landing-nav { padding: 0 24px; }
+      .landing-footer { padding: 0 24px; }
+    }
+
+    @media (max-width: 480px) {
+      .landing-h1 { font-size: 44px; }
+      .landing-ctas { flex-direction: column; align-items: center; }
+      .landing-nav-links .nav-link-plain { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="landing-nav">
+    <div class="landing-nav-brand">Single Shoe Match System</div>
+    <div class="landing-nav-links">
+      <a href="/join-network" class="nav-link-plain">Join Network</a>
+      <a href="/create-network" class="nav-link-accent">Create Network</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="landing-hero">
+    <div class="landing-tag">Single Shoe Match System</div>
+    <h1 class="landing-h1">Match Singles.<br><em>Recover Value.</em></h1>
+    <p class="landing-sub">
+      Connect your store locations, post mismatched singles, and recover lost inventory value — automatically.
+    </p>
+    <div class="landing-ctas">
+      <a href="/create-network" class="btn-main">Create a Network</a>
+      <a href="/join-network" class="btn-ghost">I have a join code</a>
+    </div>
+  </div>
+
+  <!-- Feature strip -->
+  <div class="landing-strip">
+    <div class="strip-item">
+      <div class="strip-icon">🔗</div>
+      <div class="strip-text">
+        <h3>Connect Stores</h3>
+        <p>Link multiple locations under one network using a simple join code.</p>
+      </div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-icon">👟</div>
+      <div class="strip-text">
+        <h3>Instant Matching</h3>
+        <p>Every shoe posted is checked against the network the moment it's added.</p>
+      </div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-icon">📊</div>
+      <div class="strip-text">
+        <h3>Track Recovery</h3>
+        <p>Confirmed pairs log recovered value by store and network in real time.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <p>© 2026 Single Shoe Match System — Retail Pair Recovery</p>
+  </footer>
+
+</body>
+</html>
