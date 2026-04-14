@@ -17,9 +17,13 @@ db.serialize(() => {
         CREATE TABLE IF NOT EXISTS networks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            join_code TEXT NOT NULL UNIQUE
+            join_code TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL DEFAULT ''
         )
     `);
+
+    // Safely add password column if it doesn't exist (for existing databases)
+    db.run(`ALTER TABLE networks ADD COLUMN password TEXT NOT NULL DEFAULT ''`, () => {});
 
     //////////////////// NETWORK MEMBERS ////////////////////
 

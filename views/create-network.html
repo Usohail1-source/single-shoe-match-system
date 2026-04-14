@@ -276,6 +276,9 @@
           <label for="network_name">Network Name</label>
           <input type="text" id="network_name" name="network_name" placeholder="e.g. Northeast Region" required>
 
+          <label for="network_password">Network Password</label>
+          <input type="password" id="network_password" name="network_password" placeholder="Set a password for your network" required>
+
           <div class="auth-divider" style="margin-top: 28px;">
             <span class="auth-divider-label">Your Store</span>
           </div>
@@ -285,6 +288,14 @@
 
           <label for="store_number">Store Number</label>
           <input type="text" id="store_number" name="store_number" placeholder="e.g. 4821" required>
+
+          <div class="auth-divider" style="margin-top: 28px;">
+            <span class="auth-divider-label">Network Password</span>
+          </div>
+
+          <label for="network_password">Set a Password</label>
+          <input type="password" id="network_password" name="network_password" placeholder="Others will need this to join" required>
+          <div class="code-hint" style="text-align:left; margin-top:6px;">Share this password with stores you want to let in</div>
 
           <button type="submit" class="auth-submit">Create Network →</button>
         </form>

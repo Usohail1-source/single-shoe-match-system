@@ -430,11 +430,12 @@ app.post('/create-network', (req, res) => {
     const networkName = (req.body.network_name || '').trim();
     const storeName = (req.body.store_name || '').trim();
     const storeNumber = (req.body.store_number || '').trim();
+    const networkPassword = (req.body.network_password || '').trim();
 
-    if (!networkName || !storeName || !storeNumber) {
+    if (!networkName || !storeName || !storeNumber || !networkPassword) {
         return res.send(renderMessagePage(
             'Missing Information',
-            'Please complete all required fields.',
+            'Please complete all required fields including the network password.',
             [{ href: '/', label: 'Back to Home' }, { href: '/create-network', label: 'Back to Create Network' }],
             'error-box'
         ));
@@ -442,7 +443,7 @@ app.post('/create-network', (req, res) => {
 
     const joinCode = generateJoinCode();
 
-    db.run('INSERT INTO networks (name, join_code) VALUES (?, ?)', [networkName, joinCode], function(err) {
+    db.run('INSERT INTO networks (name, join_code, password) VALUES (?, ?, ?)', [networkName, joinCode, networkPassword], function(err) {
         if (err) {
             console.error(err.message);
             return res.send(renderMessagePage('Error', 'Could not create network.',
@@ -477,8 +478,9 @@ app.post('/join-network', (req, res) => {
     const joinCode = (req.body.join_code || '').trim().toUpperCase();
     const storeName = (req.body.store_name || '').trim();
     const storeNumber = (req.body.store_number || '').trim();
+    const networkPassword = (req.body.network_password || '').trim();
 
-    if (!joinCode || !storeName || !storeNumber) {
+    if (!joinCode || !storeName || !storeNumber || !networkPassword) {
         return res.send(renderMessagePage('Missing Information', 'Please complete all required fields.',
             [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Back to Join Network' }], 'error-box'));
     }
@@ -492,6 +494,12 @@ app.post('/join-network', (req, res) => {
 
         if (!network) {
             return res.send(renderMessagePage('Invalid Join Code', 'No network was found for that join code.',
+                [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Try Again' }], 'error-box'));
+        }
+
+        // Check password
+        if (network.password && network.password !== networkPassword) {
+            return res.send(renderMessagePage('Incorrect Password', 'The password you entered is incorrect.',
                 [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Try Again' }], 'error-box'));
         }
 
