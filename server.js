@@ -468,11 +468,68 @@ app.post('/create-network', (req, res) => {
     });
 });
 
-//////////////////// JOIN NETWORK ////////////////////
+//////////////////// JOIN NETWORK — STEP 1: FIND ////////////////////
 
 app.get('/join-network', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'join-network.html'));
 });
+
+app.post('/find-network', (req, res) => {
+    const joinCode = (req.body.join_code || '').trim().toUpperCase();
+    const storeName = (req.body.store_name || '').trim();
+    const storeNumber = (req.body.store_number || '').trim();
+
+    if (!joinCode || !storeName || !storeNumber) {
+        return res.send(renderMessagePage('Missing Information', 'Please complete all required fields.',
+            [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Back to Join Network' }], 'error-box'));
+    }
+
+    db.get('SELECT * FROM networks WHERE join_code = ?', [joinCode], (err, network) => {
+        if (err || !network) {
+            return res.send(renderMessagePage('Invalid Join Code', 'No network was found for that join code.',
+                [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Try Again' }], 'error-box'));
+        }
+
+        // Show password page with network name revealed
+        res.send('<!DOCTYPE html><html lang="en"><head>' +
+            '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+            '<title>Enter Password — Single Match</title>' +
+            '<link rel="stylesheet" href="/css/style.css">' +
+            '<style>' +
+            'body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);}' +
+            '.pw-wrap{width:100%;max-width:420px;padding:24px;}' +
+            '.pw-card{background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius-lg);padding:40px 36px;text-align:center;}' +
+            '.pw-network-name{font-size:28px;font-weight:700;color:var(--text-primary);letter-spacing:-0.02em;margin-bottom:6px;}' +
+            '.pw-sub{font-size:13px;color:var(--text-muted);margin-bottom:28px;line-height:1.6;}' +
+            '.pw-card label{text-align:left;margin-top:0;}' +
+            '.pw-card input[type="password"]{font-size:15px;padding:13px 16px;background:var(--surface-2);color:var(--text-primary);margin-bottom:16px;}' +
+            'input[type="password"]::placeholder{color:var(--text-faint);}' +
+            '.pw-card button{width:100%;justify-content:center;padding:13px;font-size:15px;font-weight:700;}' +
+            '.pw-back{display:block;text-align:center;margin-top:16px;font-size:12px;color:var(--text-muted);text-decoration:none;}' +
+            '.pw-back:hover{color:var(--text-secondary);}' +
+            '.pw-lock{font-size:36px;margin-bottom:16px;}' +
+            '</style></head><body>' +
+            '<div class="pw-wrap">' +
+            '<div class="pw-card">' +
+            '<div class="pw-lock">🔒</div>' +
+            '<div class="pw-network-name">' + escapeHtml(formatText(network.name)) + '</div>' +
+            '<div class="pw-sub">This network is password protected.<br>Enter the password to join.</div>' +
+            '<form method="POST" action="/join-network" autocomplete="off">' +
+            '<input type="hidden" name="join_code" value="' + escapeHtml(joinCode) + '">' +
+            '<input type="hidden" name="store_name" value="' + escapeHtml(storeName) + '">' +
+            '<input type="hidden" name="store_number" value="' + escapeHtml(storeNumber) + '">' +
+            '<label>Network Password</label>' +
+            '<input type="password" name="network_password" placeholder="Enter password" required autofocus>' +
+            '<button type="submit">Join Network →</button>' +
+            '</form>' +
+            '<a href="/join-network" class="pw-back">← Back</a>' +
+            '</div>' +
+            '</div>' +
+            '</body></html>');
+    });
+});
+
+//////////////////// JOIN NETWORK — STEP 2: PASSWORD ////////////////////
 
 app.post('/join-network', (req, res) => {
     const joinCode = (req.body.join_code || '').trim().toUpperCase();
@@ -486,21 +543,14 @@ app.post('/join-network', (req, res) => {
     }
 
     db.get('SELECT * FROM networks WHERE join_code = ?', [joinCode], (err, network) => {
-        if (err) {
-            console.error(err.message);
-            return res.send(renderMessagePage('Error', 'Could not join network.',
-                [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Back to Join Network' }], 'error-box'));
-        }
-
-        if (!network) {
+        if (err || !network) {
             return res.send(renderMessagePage('Invalid Join Code', 'No network was found for that join code.',
                 [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Try Again' }], 'error-box'));
         }
 
-        // Check password
         if (network.password && network.password !== networkPassword) {
-            return res.send(renderMessagePage('Incorrect Password', 'The password you entered is incorrect.',
-                [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Try Again' }], 'error-box'));
+            return res.send(renderMessagePage('Incorrect Password', 'The password you entered is incorrect. Please try again.',
+                [{ href: '/join-network', label: 'Try Again' }], 'error-box'));
         }
 
         db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number) VALUES (?, ?, ?)',

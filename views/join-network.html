@@ -233,6 +233,15 @@
       padding: 13px 16px;
       background: var(--surface);
       border-color: var(--border-2);
+      color: var(--text-primary);
+    }
+
+    input[type="password"] {
+      color: var(--text-primary) !important;
+    }
+
+    input[type="password"]::placeholder {
+      color: var(--text-faint) !important;
     }
 
     .auth-form-wrap input:not(.code-input):focus {
@@ -282,7 +291,7 @@
         <div class="auth-form-title">Join a Network</div>
         <div class="auth-form-sub">Enter your 6-character join code to connect your store to an existing network.</div>
 
-        <form autocomplete="off" method="POST" action="/join-network">
+        <form autocomplete="off" method="POST" action="/find-network">
 
           <div class="auth-divider">
             <span class="auth-divider-label">Join Code</span>
@@ -301,9 +310,6 @@
           >
           <div class="code-hint">6-character code — ask your network admin</div>
 
-          <label for="network_password">Network Password</label>
-          <input type="password" id="network_password" name="network_password" placeholder="Enter the network password" required>
-
           <div class="auth-divider" style="margin-top: 28px;">
             <span class="auth-divider-label">Your Store</span>
           </div>
@@ -314,14 +320,7 @@
           <label for="store_number">Store Number</label>
           <input type="text" id="store_number" name="store_number" placeholder="e.g. 4821" required>
 
-          <div class="auth-divider" style="margin-top: 28px;">
-            <span class="auth-divider-label">Network Password</span>
-          </div>
-
-          <label for="network_password">Network Password</label>
-          <input type="password" id="network_password" name="network_password" placeholder="Password set by network creator" required>
-
-          <button type="submit" class="auth-submit">Join Network →</button>
+          <button type="submit" class="auth-submit">Find Network →</button>
         </form>
 
         <div class="auth-footer">
