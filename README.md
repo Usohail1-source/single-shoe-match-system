@@ -70,18 +70,6 @@ This project was built to solve a real-world retail problem by improving collabo
 
 ---
 
-## 📸 Screenshots
-
-*Add screenshots here*
-
-Example:
-
-![Dashboard](public/screenshots/dashboard.png)
-![Add Shoe](public/screenshots/add-shoe.png)
-![Matches](public/screenshots/matches.png)
-
----
-
 ## ⚙️ How to Run Locally
 
 1. Clone the repository:
