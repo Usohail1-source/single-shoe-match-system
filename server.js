@@ -649,12 +649,15 @@ app.get('/network', requireNetwork, (req, res) => {
                         '<div class="stats-grid">' +
                         renderStatCardLink(stats.store_single_count, 'Singles', '/unmatched?store_filter=' + myStoreFilterEncoded, 'normal-card') +
                         renderStatCardLink(stats.store_potential_count, 'Potential Matches', '/potential-matches') +
-                        renderStatCardLink(stats.awaiting_confirmation_count, 'Awaiting Confirmation', '/awaiting-confirmation') +
                         '</div>' +
 
-                        '<div class="stats-grid store-secondary-stats">' +
+                        '<div class="stats-grid">' +
                         renderStatCardLink(stats.store_pairs_made, 'Pairs Made', '/confirmed-matches', 'gain-card') +
                         '<div class="stat-card gain-card"><h3>' + escapeHtml(formatCurrency(stats.store_recovered_value)) + '</h3><p>Recovered Value</p></div>' +
+                        '</div>' +
+
+                        '<div class="stats-grid" style="grid-template-columns:1fr;">' +
+                        renderStatCardLink(stats.awaiting_confirmation_count, 'Awaiting Confirmation', '/awaiting-confirmation') +
                         '</div>' +
 
                         '<a href="/add" class="add-shoe-banner">' +
