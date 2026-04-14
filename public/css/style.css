@@ -1121,7 +1121,7 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(200,240,80,0.07);
 }
 
-input::placeholder { color: var(--text-faint); }
+
 
 select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23585868' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -1296,21 +1296,24 @@ form[action*="cancel-request"] button:hover {
 }
 
 .confirmed-pair-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin-bottom: 5px;
+  letter-spacing: -0.01em;
 }
 
 .confirmed-pair-meta {
-  font-size: 12px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 3px;
+}
+
+.confirmed-pair-stores {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
 }
 
 .confirmed-pair-value {

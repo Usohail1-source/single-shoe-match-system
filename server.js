@@ -210,6 +210,10 @@ function renderPage(title, bodyHtml, options) {
         '  var isHidden = body.classList.toggle("hidden");' +
         '  titleEl.classList.toggle("collapsed", isHidden);' +
         '}' +
+        'document.addEventListener("DOMContentLoaded", function() {' +
+        '  document.querySelectorAll("form").forEach(function(f) { f.setAttribute("autocomplete","off"); });' +
+        '  document.querySelectorAll("input,select,textarea").forEach(function(i) { i.setAttribute("autocomplete","off"); });' +
+        '});' +
         'function openLightbox(src) {' +
         '  var lb = document.getElementById("img-lightbox");' +
         '  var img = document.getElementById("lightbox-img");' +
@@ -300,13 +304,13 @@ function renderStatCardLink(number, label, href, extraClass) {
 
 function getConditionBadge(condition) {
     const c = (condition || 'new').toLowerCase();
-    if (c === 'worn') return '<p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><strong style="color:var(--text-secondary);">Condition:</strong> Worn</p>';
-    return '<p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><strong style="color:var(--text-secondary);">Condition:</strong> New</p>';
+    if (c === 'worn') return '<p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;"><strong style="color:var(--text-primary);">Condition:</strong> Worn</p>';
+    return '<p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;"><strong style="color:var(--text-primary);">Condition:</strong> New</p>';
 }
 
 function getPriceTypeBadge(priceType) {
     const p = (priceType || 'original').toLowerCase();
-    if (p === 'sale') return '<p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><strong style="color:var(--text-secondary);">Price Type:</strong> Sale</p>';
+    if (p === 'sale') return '<p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;"><strong style="color:var(--text-primary);">Price Type:</strong> Sale</p>';
     return '';
 }
 
@@ -612,7 +616,7 @@ app.get('/network', requireNetwork, (req, res) => {
                         '<div class="collapsible-body" id="network-overview-body">' +
                         '<div class="stats-grid">' +
                         '<div class="stat-card normal-card"><a href="/unmatched" class="stat-card-link"><h3>' + escapeHtml(String(stats.total_single_count)) + '</h3><p>Total Singles</p></a></div>' +
-                        renderStatCardLink(stats.total_pairs_made, 'Total Pairs Made', '/confirmed-matches', 'gain-card') +
+                        renderStatCardLink(stats.total_pairs_made, 'Total Pairs Made', '/confirmed-matches/all', 'gain-card') +
                         '<div class="stat-card gain-card"><h3>' + escapeHtml(formatCurrency(stats.total_recovered_value)) + '</h3><p>Total Recovered Value</p></div>' +
                         '</div>' +
                         '</div>' +
@@ -739,7 +743,7 @@ app.post('/add-shoe', requireNetwork, upload.single('shoe_image'), (req, res) =>
                         return '<div class="match-card">' +
                             renderShoeCard(addedShoe, { title: 'Your Shoe', altText: 'Your shoe' }) +
                             renderShoeCard(match, { title: 'Possible Match', altText: 'Possible match shoe' }) +
-                            '<form method="POST" action="/send-match-request">' +
+                            '<form method="POST" action="/send-match-request" autocomplete="off">' +
                             '<input type="hidden" name="shoe1_id" value="' + newShoeId + '">' +
                             '<input type="hidden" name="shoe2_id" value="' + match.id + '">' +
                             '<label>Requested By</label>' +
@@ -762,6 +766,60 @@ app.post('/add-shoe', requireNetwork, upload.single('shoe_image'), (req, res) =>
             );
         }
     );
+});
+
+//////////////////// CONFIRMED (ALL NETWORK) ////////////////////
+
+app.get('/confirmed-matches/all', requireNetwork, (req, res) => {
+    const networkId = req.session.network_id;
+
+    const query =
+        'SELECT cm.id AS match_id, cm.confirmed_at, cm.confirmed_by, cm.confirming_store_name, cm.confirming_store_number, cm.recovered_value, ' +
+        pendingRequestSelectFields('s1', 's2') +
+        ' FROM confirmed_matches cm' +
+        ' JOIN shoes s1 ON s1.id = cm.shoe1_id' +
+        ' JOIN shoes s2 ON s2.id = cm.shoe2_id' +
+        ' WHERE cm.network_id = ?' +
+        ' ORDER BY cm.confirmed_at DESC';
+
+    db.all(query, [networkId], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.send('Error loading confirmed matches');
+        }
+
+        const matchesHtml = rows.length
+            ? rows.map(function(row) {
+                const shoe1 = buildShoeFromPrefix(row, 'shoe1');
+                const shoe2 = buildShoeFromPrefix(row, 'shoe2');
+                const pairId = 'pair-all-' + row.match_id;
+                return '<div class="confirmed-pair-card" onclick="togglePair(\'' + pairId + '\', this)">' +
+                    '<div class="confirmed-pair-summary">' +
+                    '<div class="confirmed-pair-image">' + renderImage(shoe1.image_path || shoe2.image_path, 'Confirmed pair') + '</div>' +
+                    '<div class="confirmed-pair-info">' +
+                    '<div class="confirmed-pair-title">' + escapeHtml(formatText(shoe1.brand)) + ' ' + escapeHtml(formatText(shoe1.model)) + '</div>' +
+                    '<div class="confirmed-pair-meta">Size ' + escapeHtml(shoe1.size) + ' &nbsp;·&nbsp; ' + escapeHtml(formatText(shoe1.color)) + '</div>' +
+                    '<div class="confirmed-pair-stores">' + escapeHtml(formatText(shoe1.store_name)) + ' (' + escapeHtml(shoe1.store_number) + ') &nbsp;+&nbsp; ' + escapeHtml(formatText(shoe2.store_name)) + ' (' + escapeHtml(shoe2.store_number) + ')</div>' +
+                    '<div class="confirmed-pair-value">' + escapeHtml(formatCurrency(row.recovered_value)) + ' recovered</div>' +
+                    '</div>' +
+                    '<div class="confirmed-pair-chevron">▾</div>' +
+                    '</div>' +
+                    '<div class="confirmed-pair-details" id="' + pairId + '" style="display:none;">' +
+                    renderShoeCard(shoe1, { altText: 'Shoe 1' }) +
+                    renderShoeCard(shoe2, { altText: 'Shoe 2' }) +
+                    '<div class="success-box" style="margin-top:12px;">Confirmed by ' + escapeHtml(formatText(row.confirmed_by)) + ' &nbsp;·&nbsp; Recovered ' + escapeHtml(formatCurrency(row.recovered_value)) + '</div>' +
+                    '</div>' +
+                    '</div>';
+            }).join('')
+            : '<div class="info-box">No pairs have been confirmed in this network yet.</div>';
+
+        res.send(renderPage('All Confirmed Pairs',
+            renderTopLinks([{ href: '/network', label: 'Home' }, { href: '/confirmed-matches', label: 'My Store Pairs' }]) +
+            '<script>function togglePair(id, card) { var el = document.getElementById(id); if (!el) return; var open = el.style.display === "block"; el.style.display = open ? "none" : "block"; card.classList.toggle("confirmed-pair-open", !open); }</script>' +
+            '<div class="hero"><h1>All Confirmed Pairs</h1><p>Every pair confirmed across the entire network.</p></div>' +
+            '<div class="confirmed-list">' + matchesHtml + '</div>'
+        ));
+    });
 });
 
 //////////////////// CONFIRMED ////////////////////
@@ -799,8 +857,12 @@ app.get('/confirmed-matches', requireNetwork, (req, res) => {
                     '<div class="confirmed-pair-info">' +
                     '<div class="confirmed-pair-title">' + escapeHtml(formatText(shoe1.brand)) + ' ' + escapeHtml(formatText(shoe1.model)) + '</div>' +
                     '<div class="confirmed-pair-meta">' +
-                    'Size ' + escapeHtml(shoe1.size) + ' &nbsp;·&nbsp; ' + escapeHtml(formatText(shoe1.color)) + ' &nbsp;·&nbsp; ' +
-                    escapeHtml(formatText(shoe1.store_name)) + ' + ' + escapeHtml(formatText(shoe2.store_name)) +
+                    'Size ' + escapeHtml(shoe1.size) + ' &nbsp;·&nbsp; ' + escapeHtml(formatText(shoe1.color)) +
+                    '</div>' +
+                    '<div class="confirmed-pair-stores">' +
+                    escapeHtml(formatText(shoe1.store_name)) + ' (' + escapeHtml(shoe1.store_number) + ')' +
+                    ' &nbsp;+&nbsp; ' +
+                    escapeHtml(formatText(shoe2.store_name)) + ' (' + escapeHtml(shoe2.store_number) + ')' +
                     '</div>' +
                     '<div class="confirmed-pair-value">' + escapeHtml(formatCurrency(row.recovered_value)) + ' recovered</div>' +
                     '</div>' +
@@ -1297,7 +1359,7 @@ app.get('/unmatched', requireNetwork, (req, res) => {
                 res.send(renderPage('View Singles',
                     renderTopLinks([{ href: '/network', label: 'Home' }, { href: '/add', label: 'Add Single Shoe' }]) +
                     '<div class="hero"><h1>Single Shoes</h1><p>All unmatched shoes in the network.</p><p><strong>' + shoes.length + ' total</strong></p></div>' +
-                    '<form method="GET" action="/unmatched" class="filter-form">' +
+                    '<form method="GET" action="/unmatched" class="filter-form" autocomplete="off">' +
                     '<input type="text" name="search" placeholder="Search by model or SKU..." value="' + escapeHtml(search) + '">' +
                     brandSelect +
                     '<select name="gender"><option value="">All Genders</option><option value="men" ' + (gender === 'men' ? 'selected' : '') + '>Men</option><option value="women" ' + (gender === 'women' ? 'selected' : '') + '>Women</option><option value="kids" ' + (gender === 'kids' ? 'selected' : '') + '>Kids</option></select>' +
@@ -1367,7 +1429,7 @@ app.get('/potential-matches', requireNetwork, (req, res) => {
                 '<h2 class="section-title">Potential Pair</h2>' +
                 renderShoeCard(shoe1, { title: 'Shoe 1', altText: 'Potential shoe 1' }) +
                 renderShoeCard(shoe2, { title: 'Shoe 2', altText: 'Potential shoe 2' }) +
-                '<form method="POST" action="/send-match-request">' +
+                '<form method="POST" action="/send-match-request" autocomplete="off">' +
                 '<input type="hidden" name="shoe1_id" value="' + row.shoe1_id + '">' +
                 '<input type="hidden" name="shoe2_id" value="' + row.shoe2_id + '">' +
                 '<label>Requested By</label><input type="text" name="requested_by" required>' +
@@ -1379,7 +1441,7 @@ app.get('/potential-matches', requireNetwork, (req, res) => {
         res.send(renderPage('Potential Matches',
             renderTopLinks([{ href: '/network', label: 'Home' }, { href: '/unmatched', label: 'Single Shoes' }, { href: '/awaiting-confirmation', label: 'Awaiting Confirmation' }]) +
             '<div class="hero"><h1>Potential Matches</h1><p>Possible matches involving your store\'s shoes.</p><p><strong>' + rows.length + ' potential pair' + (rows.length === 1 ? '' : 's') + '</strong></p></div>' +
-            '<form method="GET" action="/potential-matches" class="filter-form">' +
+            '<form method="GET" action="/potential-matches" class="filter-form" autocomplete="off">' +
             '<input type="text" name="search" placeholder="Search by model or SKU..." value="' + escapeHtml(search) + '">' +
             brandSelect +
             '<select name="gender"><option value="">All Genders</option><option value="men" ' + (gender === 'men' ? 'selected' : '') + '>Men</option><option value="women" ' + (gender === 'women' ? 'selected' : '') + '>Women</option><option value="kids" ' + (gender === 'kids' ? 'selected' : '') + '>Kids</option></select>' +
