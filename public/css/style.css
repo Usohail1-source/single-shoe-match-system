@@ -1474,16 +1474,85 @@ input[type="file"]::-webkit-file-upload-button:hover {
 @media (max-width: 768px) {
   .app-sidebar { display: none; }
   .app-main { margin-left: 0; }
-  .app-content { padding: 20px 16px 60px; }
+  .app-content { padding: 16px 14px 90px; } /* extra bottom for nav bar */
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .unmatched-grid { grid-template-columns: 1fr; }
   .shoe-card-layout { flex-direction: column; }
-  .shoe-card-image-wrap { width: 100%; height: 150px; }
+  .shoe-card-image-wrap { width: 100%; height: 180px; }
   .filter-form { flex-direction: column; }
   .filter-form input, .filter-form select { width: 100%; }
+  .hero { text-align: center; padding-bottom: 20px; margin-bottom: 20px; }
+  .hero h1.network-name { font-size: 32px; }
+  .hero h1 { font-size: 26px; }
+  .section-title { font-size: 11px; padding: 11px 14px; }
+  .app-topbar { padding: 0 16px; }
+  .app-topbar-title { font-size: 10px; }
+  .secure-indicator { font-size: 9px; }
+
+  /* Stack secondary stats so no lonely cards */
+  .stats-grid.store-secondary-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .dashboard-grid { grid-template-columns: 1fr; }
+  .stat-card h3 { font-size: 26px; }
 }
+
+/* ============================================================
+   MOBILE BOTTOM NAV
+   ============================================================ */
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 62px;
+  background: var(--surface);
+  border-top: 1px solid var(--border-2);
+  z-index: 200;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 4px;
+  backdrop-filter: blur(16px);
+}
+
+@media (max-width: 768px) {
+  .mobile-nav { display: flex; }
+}
+
+.mobile-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+
+.mobile-nav a:hover,
+.mobile-nav a.active {
+  background: var(--surface-2);
+}
+
+.mobile-nav-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.mobile-nav-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.mobile-nav a.active .mobile-nav-label { color: var(--accent); }
+.mobile-nav a.active .mobile-nav-icon { filter: brightness(1.4); }
+
+/* Add shoe red + on mobile nav */
+.mobile-nav a[href="/add"] .mobile-nav-icon { color: var(--red); }

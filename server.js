@@ -2,10 +2,17 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const session = require('express-session');
+const fs = require('fs');
 const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Ensure uploads folder exists (needed for Render/cloud deployments)
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -251,7 +258,24 @@ function renderPage(title, bodyHtml, options) {
         '  showConfirm("Cancel this pending match request?", function() { form.submit(); });' +
         '}' +
         '</script>' +
-        '<div class="img-lightbox" id="img-lightbox" onclick="closeLightbox()">' +
+        '<div class="mobile-nav">' +
+        '<a href="/network" class="' + (title === 'Home' ? 'active' : '') + '">' +
+        '<span class="mobile-nav-icon">◈</span>' +
+        '<span class="mobile-nav-label">Home</span>' +
+        '</a>' +
+        '<a href="/unmatched" class="' + (title === 'View Singles' ? 'active' : '') + '">' +
+        '<span class="mobile-nav-icon">◎</span>' +
+        '<span class="mobile-nav-label">Singles</span>' +
+        '</a>' +
+        '<a href="/awaiting-confirmation" class="' + (title === 'Awaiting Confirmation' ? 'active' : '') + '">' +
+        '<span class="mobile-nav-icon">◷</span>' +
+        '<span class="mobile-nav-label">Confirm</span>' +
+        '</a>' +
+        '<a href="/add" class="' + (title === 'Add Single Shoe' ? 'active' : '') + '">' +
+        '<span class="mobile-nav-icon">+</span>' +
+        '<span class="mobile-nav-label">Add Shoe</span>' +
+        '</a>' +
+        '</div>' +
         '<img id="lightbox-img" src="" alt="Shoe">' +
         '</div>' +
         '<div class="confirm-overlay" id="confirm-overlay">' +
