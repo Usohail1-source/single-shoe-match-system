@@ -7,222 +7,106 @@
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body { display: flex; flex-direction: column; min-height: 100vh; }
+    .auth-shell { flex: 1; display: flex; min-height: 100vh; }
 
-    .auth-shell {
-      flex: 1;
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* Left panel — branding */
     .auth-left {
-      width: 420px;
-      flex-shrink: 0;
+      width: 420px; flex-shrink: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       justify-content: space-between;
       padding: 48px 44px;
-      position: relative;
-      overflow: hidden;
+      position: relative; overflow: hidden;
     }
-
     .auth-left::before {
-      content: '';
-      position: absolute;
+      content: ''; position: absolute;
       top: -100px; left: -100px;
-      width: 400px; height: 400px;
-      border-radius: 50%;
+      width: 400px; height: 400px; border-radius: 50%;
       background: radial-gradient(circle, rgba(200,240,80,0.08) 0%, transparent 70%);
       pointer-events: none;
     }
-
     .auth-left::after {
-      content: '';
-      position: absolute;
+      content: ''; position: absolute;
       bottom: -80px; right: -80px;
-      width: 300px; height: 300px;
-      border-radius: 50%;
+      width: 300px; height: 300px; border-radius: 50%;
       background: radial-gradient(circle, rgba(80,240,160,0.05) 0%, transparent 70%);
       pointer-events: none;
     }
-
-    .auth-brand {
-      position: relative;
-      z-index: 1;
-    }
-
     .auth-brand-name {
-      font-family: var(--font-display);
-      font-size: 26px;
-      
-      font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
+      font-family: var(--font-body); font-size: 14px; font-weight: 700;
+      color: var(--text-primary); letter-spacing: -0.01em;
     }
-
     .auth-brand-sub {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.10em;
+      text-transform: uppercase; color: var(--text-faint); margin-top: 4px;
     }
-
-    .auth-tagline {
-      position: relative;
-      z-index: 1;
-    }
-
+    .auth-tagline { position: relative; z-index: 1; }
     .auth-tagline h2 {
-      font-family: var(--font-display);
-      font-size: 36px;
-      
-      font-weight: 400;
-      color: var(--text-primary);
-      line-height: 1.2;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
+      font-family: var(--font-display); font-size: 36px; font-weight: 400;
+      color: var(--text-primary); line-height: 1.2; margin-bottom: 16px;
     }
-
     .auth-tagline h2 span { color: var(--accent); }
-
-    .auth-tagline p {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.7;
-      max-width: 300px;
-    }
-
-    .auth-features {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
+    .auth-tagline p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+    .auth-features { display: flex; flex-direction: column; gap: 12px; }
     .auth-feature {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 13px;
-      color: var(--text-muted);
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--text-secondary);
     }
-
     .auth-feature-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0;
+      box-shadow: 0 0 8px var(--accent-glow);
     }
-
-    /* Right panel — form */
     .auth-right {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 40px;
-      background: var(--bg);
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 48px 52px; background: var(--bg);
     }
-
-    .auth-form-wrap {
-      width: 100%;
-      max-width: 420px;
-    }
-
+    .auth-form-wrap { width: 100%; max-width: 400px; }
     .auth-form-title {
-      font-family: var(--font-display);
-      font-size: 32px;
-      
-      font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
+      font-family: var(--font-body); font-size: 24px; font-weight: 700;
+      color: var(--text-primary); letter-spacing: -0.02em; margin-bottom: 8px;
     }
-
-    .auth-form-sub {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 36px;
-      line-height: 1.6;
-    }
-
-    .auth-form-group {
-      margin-bottom: 4px;
-    }
-
+    .auth-form-sub { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px; }
     .auth-divider {
-      height: 1px;
-      background: var(--border);
-      margin: 24px 0;
-      position: relative;
+      display: flex; align-items: center; gap: 12px;
+      margin: 24px 0 4px;
     }
-
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
     .auth-divider-label {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      background: var(--bg);
-      padding-right: 12px;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text-faint); white-space: nowrap;
     }
-
-    .auth-submit {
-      width: 100%;
-      justify-content: center;
-      padding: 15px;
-      font-size: 15px;
-      font-weight: 700;
-      margin-top: 28px;
-      border-radius: var(--radius-md);
-    }
-
-    .auth-footer {
-      margin-top: 24px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .auth-footer a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 500;
-      transition: opacity var(--transition);
-    }
-
-    .auth-footer a:hover { opacity: 0.8; }
-
-    /* Override label/input sizes for auth */
     .auth-form-wrap label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 20px;
+      font-size: 12px; color: var(--text-secondary); margin-top: 20px;
     }
-
     .auth-form-wrap input {
-      font-size: 15px;
-      padding: 13px 16px;
-      background: var(--surface);
-      border-color: var(--border-2);
+      font-size: 15px; padding: 13px 16px;
+      background: var(--surface); border-color: var(--border-2);
+      color: var(--text-primary);
     }
-
+    input[type="password"] { color: var(--text-primary) !important; caret-color: var(--text-primary); }
+    input[type="password"]::placeholder { color: var(--text-faint) !important; }
     .auth-form-wrap input:focus {
       border-color: rgba(200,240,80,0.5);
       box-shadow: 0 0 0 3px rgba(200,240,80,0.08);
     }
-
+    .auth-submit {
+      margin-top: 28px; width: 100%;
+      justify-content: center; padding: 14px;
+      font-size: 15px; font-weight: 700;
+    }
+    .auth-footer {
+      margin-top: 24px; text-align: center;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .auth-footer a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .auth-footer a:hover { opacity: 0.8; }
+    .code-hint {
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+      color: var(--text-faint); margin-top: 6px; text-align: left;
+    }
     @media (max-width: 768px) {
       .auth-left { display: none; }
       .auth-right { padding: 32px 24px; }
@@ -231,87 +115,55 @@
 </head>
 <body>
   <div class="auth-shell">
-
-    <!-- Left branding panel -->
     <div class="auth-left">
       <div class="auth-brand">
-        <div class="auth-brand-name">Single Match</div>
+        <div class="auth-brand-name">Single Shoe Match System</div>
         <div class="auth-brand-sub">Retail Pair Network</div>
       </div>
-
       <div class="auth-tagline">
         <h2>Match singles.<br><span>Recover value.</span></h2>
         <p>Connect your store to a network of locations and start pairing mismatched shoes to recover lost inventory value.</p>
       </div>
-
       <div class="auth-features">
-        <div class="auth-feature">
-          <div class="auth-feature-dot"></div>
-          Share singles across store locations
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-dot"></div>
-          Instant match detection on upload
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-dot"></div>
-          Track recovered value in real time
-        </div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div>Share singles across store locations</div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div>Instant match detection on upload</div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div>Track recovered value in real time</div>
       </div>
     </div>
 
-    <!-- Right form panel -->
     <div class="auth-right">
       <div class="auth-form-wrap">
-
         <div class="auth-form-title">Create a Network</div>
-        <div class="auth-form-sub">Set up a new matching network and share the join code with other stores.</div>
+        <div class="auth-form-sub">Set up your network and store details. You'll set a password on the next step.</div>
 
         <form autocomplete="off" method="POST" action="/create-network">
 
-          <div class="auth-divider">
-            <span class="auth-divider-label">Network</span>
-          </div>
-
+          <div class="auth-divider"><span class="auth-divider-label">Network</span></div>
           <label for="network_name">Network Name</label>
-          <input type="text" id="network_name" name="network_name" placeholder="e.g. Northeast Region" required>
+          <input type="text" id="network_name" name="network_name" placeholder="e.g. FGL Sports Region" required>
 
-          <label for="network_password">Network Password</label>
-          <input type="password" id="network_password" name="network_password" placeholder="Set a password for your network" required>
-
-          <div class="auth-divider" style="margin-top: 28px;">
-            <span class="auth-divider-label">Your Store</span>
-          </div>
-
+          <div class="auth-divider" style="margin-top:28px;"><span class="auth-divider-label">Your Store</span></div>
           <label for="store_name">Store Name</label>
-          <input type="text" id="store_name" name="store_name" placeholder="e.g. Foot Locker" required>
+          <input type="text" id="store_name" name="store_name" placeholder="e.g. Sportchek" required>
 
           <label for="store_number">Store Number</label>
-          <input type="text" id="store_number" name="store_number" placeholder="e.g. 4821" required>
+          <input type="text" id="store_number" name="store_number" placeholder="e.g. 318" required>
 
-          <div class="auth-divider" style="margin-top: 28px;">
-            <span class="auth-divider-label">Network Password</span>
-          </div>
-
-          <label for="network_password">Set a Password</label>
-          <input type="password" id="network_password" name="network_password" placeholder="Others will need this to join" required>
-          <div class="code-hint" style="text-align:left; margin-top:6px;">Share this password with stores you want to let in</div>
+          <label for="network_password" style="margin-top:28px;">Set a Password</label>
+          <input type="password" id="network_password" name="network_password" placeholder="Stores will need this to join" required style="-webkit-text-security:disc; color:var(--text-primary);">
+          <div class="code-hint">Share this with stores you want in your network</div>
 
           <button type="submit" class="auth-submit">Create Network →</button>
         </form>
 
         <div class="auth-footer">
-          Already have a code?
-          <a href="/join-network">Join an existing network</a>
+          Already have a code? <a href="/join-network">Join an existing network</a>
         </div>
-
-        <div class="auth-footer" style="margin-top: 8px;">
-          <a href="/" style="color: var(--text-muted); font-size: 12px;">← Back to home</a>
+        <div class="auth-footer" style="margin-top:8px;">
+          <a href="/" style="color:var(--text-muted);font-size:12px;">← Back to home</a>
         </div>
-
       </div>
     </div>
-
   </div>
 </body>
 </html>
