@@ -145,8 +145,8 @@ vite.config.ts.timestamp-*
 *.db
 
 # Uploads (user images)
-uploads/
-public/uploads/
+public/uploads/*
+!public/uploads/.gitkeep
 
 # Environment variables
 .env
