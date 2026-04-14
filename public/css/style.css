@@ -1492,9 +1492,9 @@ input[type="file"]::-webkit-file-upload-button:hover {
 }
 
 @media (max-width: 768px) {
-  .app-sidebar { display: none; }
+  .app-sidebar { display: none !important; }
   .app-main { margin-left: 0; }
-  .app-content { padding: 16px 14px 90px; } /* extra bottom for nav bar */
+  .app-content { padding: 16px 14px 90px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .unmatched-grid { grid-template-columns: 1fr; }
   .shoe-card-layout { flex-direction: column; }
@@ -1507,10 +1507,9 @@ input[type="file"]::-webkit-file-upload-button:hover {
   .section-title { font-size: 11px; padding: 11px 14px; }
   .app-topbar { padding: 0 16px; }
   .app-topbar-title { font-size: 10px; }
-  .secure-indicator { font-size: 9px; }
-
-  /* Stack secondary stats so no lonely cards */
+  .secure-indicator { display: none; }
   .stats-grid.store-secondary-stats { grid-template-columns: repeat(2, 1fr); }
+  .container.app-shell { overflow: hidden; }
 }
 
 @media (max-width: 480px) {
