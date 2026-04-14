@@ -33,10 +33,14 @@ db.serialize(() => {
             network_id INTEGER NOT NULL,
             store_name TEXT NOT NULL,
             store_number TEXT NOT NULL,
+            password TEXT NOT NULL DEFAULT '',
             UNIQUE(network_id, store_name, store_number),
             FOREIGN KEY (network_id) REFERENCES networks(id) ON DELETE CASCADE
         )
     `);
+
+    // Safely add password column to network_members if it doesn't exist
+    db.run(`ALTER TABLE network_members ADD COLUMN password TEXT NOT NULL DEFAULT ''`, () => {});
 
     //////////////////// SHOES ////////////////////
 

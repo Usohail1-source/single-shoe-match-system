@@ -430,12 +430,12 @@ app.post('/create-network', (req, res) => {
     const networkName = (req.body.network_name || '').trim();
     const storeName = (req.body.store_name || '').trim();
     const storeNumber = (req.body.store_number || '').trim();
-    const networkPassword = (req.body.network_password || '').trim();
+    const storePassword = (req.body.store_password || '').trim();
 
-    if (!networkName || !storeName || !storeNumber || !networkPassword) {
+    if (!networkName || !storeName || !storeNumber || !storePassword) {
         return res.send(renderMessagePage(
             'Missing Information',
-            'Please complete all required fields including the network password.',
+            'Please complete all required fields including your store password.',
             [{ href: '/', label: 'Back to Home' }, { href: '/create-network', label: 'Back to Create Network' }],
             'error-box'
         ));
@@ -443,7 +443,7 @@ app.post('/create-network', (req, res) => {
 
     const joinCode = generateJoinCode();
 
-    db.run('INSERT INTO networks (name, join_code, password) VALUES (?, ?, ?)', [networkName, joinCode, networkPassword], function(err) {
+    db.run('INSERT INTO networks (name, join_code) VALUES (?, ?)', [networkName, joinCode], function(err) {
         if (err) {
             console.error(err.message);
             return res.send(renderMessagePage('Error', 'Could not create network.',
@@ -452,8 +452,8 @@ app.post('/create-network', (req, res) => {
 
         const networkId = this.lastID;
 
-        db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number) VALUES (?, ?, ?)',
-            [networkId, storeName, storeNumber], function(memberErr) {
+        db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number, password) VALUES (?, ?, ?, ?)',
+            [networkId, storeName, storeNumber, storePassword], function(memberErr) {
                 if (memberErr) {
                     console.error(memberErr.message);
                     return res.send(renderMessagePage('Error', 'Network was created, but store membership could not be saved.',
@@ -490,42 +490,60 @@ app.post('/find-network', (req, res) => {
                 [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Try Again' }], 'error-box'));
         }
 
-        // Show password page with network name revealed
-        res.send('<!DOCTYPE html><html lang="en"><head>' +
-            '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-            '<title>Enter Password — Single Match</title>' +
-            '<link rel="stylesheet" href="/css/style.css">' +
-            '<style>' +
-            'body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);}' +
-            '.pw-wrap{width:100%;max-width:420px;padding:24px;}' +
-            '.pw-card{background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius-lg);padding:40px 36px;text-align:center;}' +
-            '.pw-network-name{font-size:28px;font-weight:700;color:var(--text-primary);letter-spacing:-0.02em;margin-bottom:6px;}' +
-            '.pw-sub{font-size:13px;color:var(--text-muted);margin-bottom:28px;line-height:1.6;}' +
-            '.pw-card label{text-align:left;margin-top:0;}' +
-            '.pw-card input[type="password"]{font-size:15px;padding:13px 16px;background:var(--surface-2);color:var(--text-primary);margin-bottom:16px;}' +
-            'input[type="password"]::placeholder{color:var(--text-faint);}' +
-            '.pw-card button{width:100%;justify-content:center;padding:13px;font-size:15px;font-weight:700;}' +
-            '.pw-back{display:block;text-align:center;margin-top:16px;font-size:12px;color:var(--text-muted);text-decoration:none;}' +
-            '.pw-back:hover{color:var(--text-secondary);}' +
-            '.pw-lock{font-size:36px;margin-bottom:16px;}' +
-            '</style></head><body>' +
-            '<div class="pw-wrap">' +
-            '<div class="pw-card">' +
-            '<div class="pw-lock">🔒</div>' +
-            '<div class="pw-network-name">' + escapeHtml(formatText(network.name)) + '</div>' +
-            '<div class="pw-sub">This network is password protected.<br>Enter the password to join.</div>' +
-            '<form method="POST" action="/join-network" autocomplete="off">' +
-            '<input type="hidden" name="join_code" value="' + escapeHtml(joinCode) + '">' +
-            '<input type="hidden" name="store_name" value="' + escapeHtml(storeName) + '">' +
-            '<input type="hidden" name="store_number" value="' + escapeHtml(storeNumber) + '">' +
-            '<label>Network Password</label>' +
-            '<input type="password" name="network_password" placeholder="Enter password" required autofocus>' +
-            '<button type="submit">Join Network →</button>' +
-            '</form>' +
-            '<a href="/join-network" class="pw-back">← Back</a>' +
-            '</div>' +
-            '</div>' +
-            '</body></html>');
+        // Check if this store already exists in the network
+        db.get('SELECT * FROM network_members WHERE network_id = ? AND store_name = ? AND store_number = ?',
+            [network.id, storeName, storeNumber], (memberErr, member) => {
+                if (memberErr) {
+                    return res.send(renderMessagePage('Error', 'Could not check store membership.',
+                        [{ href: '/join-network', label: 'Try Again' }], 'error-box'));
+                }
+
+                const isReturning = !!member;
+                const promptText = isReturning
+                    ? 'Welcome back! Enter your store password to continue.'
+                    : 'New store detected. Set a password for your store — you\'ll need it every time you log in.';
+                const buttonText = isReturning ? 'Log In →' : 'Set Password & Join →';
+                const labelText = isReturning ? 'Store Password' : 'Set Your Store Password';
+                const inputPlaceholder = isReturning ? 'Enter your store password' : 'Create a password for your store';
+
+                res.send('<!DOCTYPE html><html lang="en"><head>' +
+                    '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+                    '<title>' + (isReturning ? 'Log In' : 'Set Password') + ' — Single Match</title>' +
+                    '<link rel="stylesheet" href="/css/style.css">' +
+                    '<style>' +
+                    'body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);}' +
+                    '.pw-wrap{width:100%;max-width:420px;padding:24px;}' +
+                    '.pw-card{background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius-lg);padding:40px 36px;text-align:center;box-shadow:var(--shadow-lg);}' +
+                    '.pw-network{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;}' +
+                    '.pw-store-name{font-size:26px;font-weight:700;color:var(--text-primary);letter-spacing:-0.02em;margin-bottom:4px;}' +
+                    '.pw-store-num{font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:16px;}' +
+                    '.pw-sub{font-size:13px;color:var(--text-muted);margin-bottom:28px;line-height:1.6;}' +
+                    '.pw-card label{text-align:left;font-size:11px;color:var(--text-secondary);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;display:block;}' +
+                    '.pw-card input[type="password"]{font-size:15px;padding:13px 16px;background:var(--surface-2);color:var(--text-primary) !important;margin-bottom:16px;width:100%;}' +
+                    'input[type="password"]::placeholder{color:var(--text-faint);}' +
+                    '.pw-card button{width:100%;justify-content:center;padding:13px;font-size:15px;font-weight:700;}' +
+                    '.pw-back{display:block;text-align:center;margin-top:16px;font-size:12px;color:var(--text-muted);text-decoration:none;}' +
+                    '.pw-back:hover{color:var(--text-secondary);}' +
+                    '.pw-icon{font-size:34px;margin-bottom:14px;}' +
+                    '</style></head><body>' +
+                    '<div class="pw-wrap"><div class="pw-card">' +
+                    '<div class="pw-icon">' + (isReturning ? '🔑' : '🔒') + '</div>' +
+                    '<div class="pw-network">' + escapeHtml(formatText(network.name)) + '</div>' +
+                    '<div class="pw-store-name">' + escapeHtml(formatText(storeName)) + '</div>' +
+                    '<div class="pw-store-num">Store #' + escapeHtml(storeNumber) + '</div>' +
+                    '<div class="pw-sub">' + escapeHtml(promptText) + '</div>' +
+                    '<form method="POST" action="/join-network" autocomplete="off">' +
+                    '<input type="hidden" name="join_code" value="' + escapeHtml(joinCode) + '">' +
+                    '<input type="hidden" name="store_name" value="' + escapeHtml(storeName) + '">' +
+                    '<input type="hidden" name="store_number" value="' + escapeHtml(storeNumber) + '">' +
+                    '<input type="hidden" name="is_returning" value="' + (isReturning ? '1' : '0') + '">' +
+                    '<label>' + escapeHtml(labelText) + '</label>' +
+                    '<input type="password" name="store_password" placeholder="' + escapeHtml(inputPlaceholder) + '" required autofocus>' +
+                    '<button type="submit">' + escapeHtml(buttonText) + '</button>' +
+                    '</form>' +
+                    '<a href="/join-network" class="pw-back">← Back</a>' +
+                    '</div></div></body></html>');
+            });
     });
 });
 
@@ -535,9 +553,10 @@ app.post('/join-network', (req, res) => {
     const joinCode = (req.body.join_code || '').trim().toUpperCase();
     const storeName = (req.body.store_name || '').trim();
     const storeNumber = (req.body.store_number || '').trim();
-    const networkPassword = (req.body.network_password || '').trim();
+    const storePassword = (req.body.store_password || '').trim();
+    const isReturning = req.body.is_returning === '1';
 
-    if (!joinCode || !storeName || !storeNumber || !networkPassword) {
+    if (!joinCode || !storeName || !storeNumber || !storePassword) {
         return res.send(renderMessagePage('Missing Information', 'Please complete all required fields.',
             [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Back to Join Network' }], 'error-box'));
     }
@@ -548,23 +567,38 @@ app.post('/join-network', (req, res) => {
                 [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Try Again' }], 'error-box'));
         }
 
-        if (network.password && network.password !== networkPassword) {
-            return res.send(renderMessagePage('Incorrect Password', 'The password you entered is incorrect. Please try again.',
-                [{ href: '/join-network', label: 'Try Again' }], 'error-box'));
-        }
-
-        db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number) VALUES (?, ?, ?)',
-            [network.id, storeName, storeNumber], function(memberErr) {
+        db.get('SELECT * FROM network_members WHERE network_id = ? AND store_name = ? AND store_number = ?',
+            [network.id, storeName, storeNumber], (memberErr, member) => {
                 if (memberErr) {
-                    console.error(memberErr.message);
-                    return res.send(renderMessagePage('Error', 'Could not add this store to the network.',
-                        [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Back to Join Network' }], 'error-box'));
+                    return res.send(renderMessagePage('Error', 'Could not verify store.',
+                        [{ href: '/join-network', label: 'Try Again' }], 'error-box'));
                 }
 
-                req.session.network_id = network.id;
-                req.session.store_name = storeName;
-                req.session.store_number = storeNumber;
-                res.redirect('/network');
+                if (member) {
+                    // Returning store — check password
+                    if (member.password && member.password !== storePassword) {
+                        return res.send(renderMessagePage('Incorrect Password', 'That password is incorrect for ' + formatText(storeName) + ' #' + storeNumber + '. Please try again.',
+                            [{ href: '/join-network', label: 'Try Again' }], 'error-box'));
+                    }
+                    // Correct password — log in
+                    req.session.network_id = network.id;
+                    req.session.store_name = storeName;
+                    req.session.store_number = storeNumber;
+                    return res.redirect('/network');
+                } else {
+                    // New store — save with their chosen password
+                    db.run('INSERT INTO network_members (network_id, store_name, store_number, password) VALUES (?, ?, ?, ?)',
+                        [network.id, storeName, storeNumber, storePassword], function(insertErr) {
+                            if (insertErr) {
+                                return res.send(renderMessagePage('Error', 'Could not add store to network.',
+                                    [{ href: '/join-network', label: 'Try Again' }], 'error-box'));
+                            }
+                            req.session.network_id = network.id;
+                            req.session.store_name = storeName;
+                            req.session.store_number = storeNumber;
+                            res.redirect('/network');
+                        });
+                }
             });
     });
 });
