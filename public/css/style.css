@@ -1467,9 +1467,29 @@ input[type="file"]::-webkit-file-upload-button:hover {
   border-color: rgba(200,240,80,0.25);
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* Mobile logout — only shows on mobile in topbar */
+.mobile-logout {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--red);
+  text-decoration: none;
+  padding: 5px 10px;
+  border: 1px solid rgba(240,80,80,0.25);
+  border-radius: var(--radius-xs);
+  transition: all var(--transition);
+}
+
+.mobile-logout:hover {
+  background: var(--red-dim);
+}
+
+@media (max-width: 768px) {
+  .mobile-logout { display: block; }
+  .secure-indicator { display: none; }
+}
 
 @media (max-width: 768px) {
   .app-sidebar { display: none; }

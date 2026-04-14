@@ -189,6 +189,7 @@ function renderPage(title, bodyHtml, options) {
         '<span class="app-topbar-title">' + escapeHtml(title) + '</span>' +
         '<div class="app-topbar-right">' +
         '<div class="secure-indicator"><div class="secure-dot"></div>Network Active</div>' +
+        '<a href="/logout" class="mobile-logout">Log Out</a>' +
         '</div>' +
         '</div>';
 
