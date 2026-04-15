@@ -481,71 +481,38 @@ app.post('/create-network', (req, res) => {
 
     const joinCode = generateJoinCode();
 
-    // Show password-set screen before saving
-    res.send(pwPageHtml({
-        icon: '🔒',
-        title: escapeHtml(formatText(networkName)),
-        subtitle: 'Set a password for your network. Anyone joining will need this.',
-        action: '/finish-create-network',
-        hiddenFields: [
-            { name: 'network_name', value: networkName },
-            { name: 'join_code', value: joinCode },
-            { name: 'store_name', value: storeName },
-            { name: 'store_number', value: storeNumber }
-        ],
-        label: 'Network Password',
-        placeholder: 'Set a password for your network',
-        button: 'Create Network →',
-        back: '/create-network'
-    }));
+    db.run('INSERT INTO networks (name, join_code) VALUES (?, ?)', [networkName, joinCode], function(err) {
+        if (err) {
+            console.error(err.message);
+            return res.send(renderMessagePage('Error', 'Could not create network.',
+                [{ href: '/', label: 'Back to Home' }, { href: '/create-network', label: 'Back to Create Network' }], 'error-box'));
+        }
+
+        const networkId = this.lastID;
+
+        db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number, is_creator) VALUES (?, ?, ?, 1)',
+            [networkId, storeName, storeNumber], function(memberErr) {
+                if (memberErr) {
+                    console.error(memberErr.message);
+                    return res.send(renderMessagePage('Error', 'Could not save store.',
+                        [{ href: '/', label: 'Back to Home' }], 'error-box'));
+                }
+
+                req.session.network_id = networkId;
+                req.session.store_name = storeName;
+                req.session.store_number = storeNumber;
+                res.redirect('/network');
+            });
+    });
 });
 
-//////////////////// FINISH CREATE NETWORK ////////////////////
-
-app.post('/finish-create-network', (req, res) => {
-    const networkName = (req.body.network_name || '').trim();
-    const joinCode = (req.body.join_code || '').trim();
-    const storeName = (req.body.store_name || '').trim();
-    const storeNumber = (req.body.store_number || '').trim();
-    const networkPassword = (req.body.network_password || '').trim();
-
-    if (!networkName || !joinCode || !storeName || !storeNumber || !networkPassword) {
-        return res.send(renderMessagePage('Missing Information', 'Please complete all required fields.',
-            [{ href: '/create-network', label: 'Back to Create Network' }], 'error-box'));
-    }
-
-    db.run('INSERT INTO networks (name, join_code, password) VALUES (?, ?, ?)',
-        [networkName, joinCode, networkPassword], function(err) {
-            if (err) {
-                console.error(err.message);
-                return res.send(renderMessagePage('Error', 'Could not create network.',
-                    [{ href: '/create-network', label: 'Back to Create Network' }], 'error-box'));
-            }
-
-            const networkId = this.lastID;
-
-            db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number, is_creator) VALUES (?, ?, ?, 1)',
-                [networkId, storeName, storeNumber], function(memberErr) {
-                    if (memberErr) {
-                        return res.send(renderMessagePage('Error', 'Could not save store.',
-                            [{ href: '/create-network', label: 'Back to Create Network' }], 'error-box'));
-                    }
-
-                    req.session.network_id = networkId;
-                    req.session.store_name = storeName;
-                    req.session.store_number = storeNumber;
-                    res.redirect('/network');
-                });
-        });
-});
-
-//////////////////// JOIN NETWORK — STEP 1: FIND ////////////////////
+//////////////////// JOIN NETWORK ////////////////////
 
 app.get('/join-network', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'join-network.html'));
 });
 
-app.post('/find-network', (req, res) => {
+app.post('/join-network', (req, res) => {
     const joinCode = (req.body.join_code || '').trim().toUpperCase();
     const storeName = (req.body.store_name || '').trim();
     const storeNumber = (req.body.store_number || '').trim();
@@ -559,49 +526,6 @@ app.post('/find-network', (req, res) => {
         if (err || !network) {
             return res.send(renderMessagePage('Invalid Join Code', 'No network was found for that join code.',
                 [{ href: '/', label: 'Back to Home' }, { href: '/join-network', label: 'Try Again' }], 'error-box'));
-        }
-
-        // Show password page with network name revealed
-        res.send(pwPageHtml({
-            icon: '🔑',
-            title: escapeHtml(formatText(network.name)),
-            subtitle: 'Enter the network password to join.',
-            action: '/join-network',
-            hiddenFields: [
-                { name: 'join_code', value: joinCode },
-                { name: 'store_name', value: storeName },
-                { name: 'store_number', value: storeNumber }
-            ],
-            label: 'Network Password',
-            placeholder: 'Enter the network password',
-            button: 'Join Network →',
-            back: '/join-network'
-        }));
-    });
-});
-
-//////////////////// JOIN NETWORK — STEP 2: PASSWORD ////////////////////
-
-app.post('/join-network', (req, res) => {
-    const joinCode = (req.body.join_code || '').trim().toUpperCase();
-    const storeName = (req.body.store_name || '').trim();
-    const storeNumber = (req.body.store_number || '').trim();
-    const networkPassword = (req.body.network_password || '').trim();
-
-    if (!joinCode || !storeName || !storeNumber || !networkPassword) {
-        return res.send(renderMessagePage('Missing Information', 'Please complete all required fields.',
-            [{ href: '/join-network', label: 'Back to Join Network' }], 'error-box'));
-    }
-
-    db.get('SELECT * FROM networks WHERE join_code = ?', [joinCode], (err, network) => {
-        if (err || !network) {
-            return res.send(renderMessagePage('Invalid Join Code', 'No network was found for that join code.',
-                [{ href: '/join-network', label: 'Try Again' }], 'error-box'));
-        }
-
-        if (network.password && network.password !== networkPassword) {
-            return res.send(renderMessagePage('Incorrect Password', 'The password you entered is incorrect.',
-                [{ href: '/join-network', label: 'Try Again' }], 'error-box'));
         }
 
         db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number) VALUES (?, ?, ?)',
@@ -637,7 +561,7 @@ app.get('/forgot-code', (req, res) => {
         '.pw-card label:first-of-type{margin-top:0;}' +
         '.pw-card input{font-size:15px;padding:13px 16px;background:var(--surface-2);color:var(--text-primary) !important;width:100%;border:1px solid var(--border-2);border-radius:var(--radius-sm);outline:none;}' +
         '.pw-card input:focus{border-color:rgba(200,240,80,0.4);box-shadow:0 0 0 3px rgba(200,240,80,0.07);}' +
-        'input[type="password"]::placeholder,input[type="text"]::placeholder{color:var(--text-faint);}' +
+        'input::placeholder{color:var(--text-faint);}' +
         '.pw-card button{width:100%;justify-content:center;padding:13px;font-size:15px;font-weight:700;margin-top:20px;}' +
         '.pw-back{display:block;text-align:center;margin-top:16px;font-size:12px;color:var(--text-muted);text-decoration:none;}' +
         '.pw-back:hover{color:var(--text-secondary);}' +
@@ -645,7 +569,7 @@ app.get('/forgot-code', (req, res) => {
         '<div class="pw-wrap"><div class="pw-card">' +
         '<div class="pw-icon">🔍</div>' +
         '<div class="pw-title">Forgot Join Code?</div>' +
-        '<div class="pw-sub">Enter your network name, store details and network password — we\'ll log you back in.</div>' +
+        '<div class="pw-sub">Enter your network name and store details — we\'ll log you back in.</div>' +
         '<form method="POST" action="/forgot-code" autocomplete="off">' +
         '<label>Network Name</label>' +
         '<input type="text" name="network_name" placeholder="Your network name" required autofocus>' +
@@ -653,8 +577,6 @@ app.get('/forgot-code', (req, res) => {
         '<input type="text" name="store_name" placeholder="Your store name" required>' +
         '<label>Store Number</label>' +
         '<input type="text" name="store_number" placeholder="Your store number" required>' +
-        '<label>Network Password</label>' +
-        '<input type="password" name="network_password" placeholder="Network password" required>' +
         '<button type="submit">Log Me In →</button>' +
         '</form>' +
         '<a href="/join-network" class="pw-back">← Back to Join Network</a>' +
@@ -665,33 +587,31 @@ app.post('/forgot-code', (req, res) => {
     const networkName = (req.body.network_name || '').trim().toLowerCase();
     const storeName = (req.body.store_name || '').trim();
     const storeNumber = (req.body.store_number || '').trim();
-    const networkPassword = (req.body.network_password || '').trim();
 
-    if (!networkName || !storeName || !storeNumber || !networkPassword) {
+    if (!networkName || !storeName || !storeNumber) {
         return res.send(renderMessagePage('Missing Information', 'Please fill in all fields.',
             [{ href: '/forgot-code', label: 'Try Again' }], 'error-box'));
     }
 
-    db.get('SELECT * FROM networks WHERE LOWER(name) = ? AND password = ?',
-        [networkName, networkPassword], (err, network) => {
-            if (err || !network) {
-                return res.send(renderMessagePage('Not Found', 'No network matched that name and password. Please check and try again.',
-                    [{ href: '/forgot-code', label: 'Try Again' }], 'error-box'));
-            }
+    db.get('SELECT * FROM networks WHERE LOWER(name) = ?', [networkName], (err, network) => {
+        if (err || !network) {
+            return res.send(renderMessagePage('Not Found', 'No network found with that name.',
+                [{ href: '/forgot-code', label: 'Try Again' }], 'error-box'));
+        }
 
-            db.get('SELECT * FROM network_members WHERE network_id = ? AND LOWER(store_name) = ? AND store_number = ?',
-                [network.id, storeName.toLowerCase(), storeNumber], (memberErr, member) => {
-                    if (memberErr || !member) {
-                        return res.send(renderMessagePage('Store Not Found', 'That store is not part of this network.',
-                            [{ href: '/forgot-code', label: 'Try Again' }], 'error-box'));
-                    }
+        db.get('SELECT * FROM network_members WHERE network_id = ? AND LOWER(store_name) = ? AND store_number = ?',
+            [network.id, storeName.toLowerCase(), storeNumber], (memberErr, member) => {
+                if (memberErr || !member) {
+                    return res.send(renderMessagePage('Store Not Found', 'That store is not part of this network.',
+                        [{ href: '/forgot-code', label: 'Try Again' }], 'error-box'));
+                }
 
-                    req.session.network_id = network.id;
-                    req.session.store_name = member.store_name;
-                    req.session.store_number = member.store_number;
-                    res.redirect('/network');
-                });
-        });
+                req.session.network_id = network.id;
+                req.session.store_name = member.store_name;
+                req.session.store_number = member.store_number;
+                res.redirect('/network');
+            });
+    });
 });
 
 //////////////////// REMOVE STORE ////////////////////
