@@ -430,12 +430,11 @@ app.post('/create-network', (req, res) => {
     const networkName = (req.body.network_name || '').trim();
     const storeName = (req.body.store_name || '').trim();
     const storeNumber = (req.body.store_number || '').trim();
-    const storePassword = (req.body.store_password || '').trim();
 
-    if (!networkName || !storeName || !storeNumber || !storePassword) {
+    if (!networkName || !storeName || !storeNumber) {
         return res.send(renderMessagePage(
             'Missing Information',
-            'Please complete all required fields including your store password.',
+            'Please complete all required fields.',
             [{ href: '/', label: 'Back to Home' }, { href: '/create-network', label: 'Back to Create Network' }],
             'error-box'
         ));
@@ -452,20 +451,69 @@ app.post('/create-network', (req, res) => {
 
         const networkId = this.lastID;
 
-        db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number, password) VALUES (?, ?, ?, ?)',
-            [networkId, storeName, storeNumber, storePassword], function(memberErr) {
-                if (memberErr) {
-                    console.error(memberErr.message);
-                    return res.send(renderMessagePage('Error', 'Network was created, but store membership could not be saved.',
-                        [{ href: '/', label: 'Back to Home' }], 'error-box'));
-                }
-
-                req.session.network_id = networkId;
-                req.session.store_name = storeName;
-                req.session.store_number = storeNumber;
-                res.redirect('/network');
-            });
+        // Show the same password-set screen as join flow
+        res.send('<!DOCTYPE html><html lang="en"><head>' +
+            '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+            '<title>Set Password — Single Match</title>' +
+            '<link rel="stylesheet" href="/css/style.css">' +
+            '<style>' +
+            'body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);}' +
+            '.pw-wrap{width:100%;max-width:420px;padding:24px;}' +
+            '.pw-card{background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius-lg);padding:40px 36px;text-align:center;box-shadow:var(--shadow-lg);}' +
+            '.pw-network{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;}' +
+            '.pw-store-name{font-size:26px;font-weight:700;color:var(--text-primary);letter-spacing:-0.02em;margin-bottom:4px;}' +
+            '.pw-store-num{font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:16px;}' +
+            '.pw-sub{font-size:13px;color:var(--text-muted);margin-bottom:28px;line-height:1.6;}' +
+            '.pw-card label{text-align:left;font-size:11px;color:var(--text-secondary);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;display:block;}' +
+            '.pw-card input[type="password"]{font-size:15px;padding:13px 16px;background:var(--surface-2);color:var(--text-primary) !important;margin-bottom:16px;width:100%;}' +
+            'input[type="password"]::placeholder{color:var(--text-faint);}' +
+            '.pw-card button{width:100%;justify-content:center;padding:13px;font-size:15px;font-weight:700;}' +
+            '.pw-icon{font-size:34px;margin-bottom:14px;}' +
+            '</style></head><body>' +
+            '<div class="pw-wrap"><div class="pw-card">' +
+            '<div class="pw-icon">🔒</div>' +
+            '<div class="pw-network">' + escapeHtml(formatText(networkName)) + '</div>' +
+            '<div class="pw-store-name">' + escapeHtml(formatText(storeName)) + '</div>' +
+            '<div class="pw-store-num">Store #' + escapeHtml(storeNumber) + '</div>' +
+            '<div class="pw-sub">New store detected. Set a password for your store — you\'ll need it every time you log in.</div>' +
+            '<form method="POST" action="/finish-create-network" autocomplete="off">' +
+            '<input type="hidden" name="network_id" value="' + networkId + '">' +
+            '<input type="hidden" name="store_name" value="' + escapeHtml(storeName) + '">' +
+            '<input type="hidden" name="store_number" value="' + escapeHtml(storeNumber) + '">' +
+            '<label>Set Your Store Password</label>' +
+            '<input type="password" name="store_password" placeholder="Create a password for your store" required autofocus>' +
+            '<button type="submit">Set Password & Enter →</button>' +
+            '</form>' +
+            '</div></div></body></html>');
     });
+});
+
+//////////////////// FINISH CREATE NETWORK ////////////////////
+
+app.post('/finish-create-network', (req, res) => {
+    const networkId = parseInt(req.body.network_id);
+    const storeName = (req.body.store_name || '').trim();
+    const storeNumber = (req.body.store_number || '').trim();
+    const storePassword = (req.body.store_password || '').trim();
+
+    if (!networkId || !storeName || !storeNumber || !storePassword) {
+        return res.send(renderMessagePage('Missing Information', 'Please complete all required fields.',
+            [{ href: '/create-network', label: 'Back to Create Network' }], 'error-box'));
+    }
+
+    db.run('INSERT OR IGNORE INTO network_members (network_id, store_name, store_number, password) VALUES (?, ?, ?, ?)',
+        [networkId, storeName, storeNumber, storePassword], function(err) {
+            if (err) {
+                console.error(err.message);
+                return res.send(renderMessagePage('Error', 'Could not save store.',
+                    [{ href: '/create-network', label: 'Back to Create Network' }], 'error-box'));
+            }
+
+            req.session.network_id = networkId;
+            req.session.store_name = storeName;
+            req.session.store_number = storeNumber;
+            res.redirect('/network');
+        });
 });
 
 //////////////////// JOIN NETWORK — STEP 1: FIND ////////////////////
