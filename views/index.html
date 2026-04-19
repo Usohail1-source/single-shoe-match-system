@@ -87,7 +87,6 @@
       position: relative;
     }
 
-    /* Ambient glow */
     .landing-hero::before {
       content: '';
       position: absolute;
@@ -211,10 +210,10 @@
     .strip-item:last-child { border-right: none; }
 
     .strip-icon {
-      font-size: 20px;
       flex-shrink: 0;
       margin-top: 2px;
-      opacity: 0.85;
+      color: var(--accent);
+      opacity: 0.9;
     }
 
     .strip-text h3 {
@@ -237,7 +236,7 @@
       height: 48px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       flex-shrink: 0;
     }
 
@@ -290,32 +289,53 @@
 
   <!-- Feature strip -->
   <div class="landing-strip">
+
     <div class="strip-item">
-      <div class="strip-icon">🔗</div>
+      <div class="strip-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
       <div class="strip-text">
         <h3>Connect Stores</h3>
         <p>Link multiple locations under one network using a simple join code.</p>
       </div>
     </div>
+
     <div class="strip-item">
-      <div class="strip-icon">👟</div>
+      <div class="strip-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </div>
       <div class="strip-text">
         <h3>Instant Matching</h3>
         <p>Every shoe posted is checked against the network the moment it's added.</p>
       </div>
     </div>
+
     <div class="strip-item">
-      <div class="strip-icon">📊</div>
+      <div class="strip-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6"  y1="20" x2="6"  y2="14"/>
+        </svg>
+      </div>
       <div class="strip-text">
         <h3>Track Recovery</h3>
         <p>Confirmed pairs log recovered value by store and network in real time.</p>
       </div>
     </div>
+
   </div>
 
   <!-- Footer -->
   <footer class="landing-footer">
-    <p>© 2026 Single Shoe Match System — Retail Pair Recovery</p>
+    <p>© 2026 Single Shoe Match System</p>
+    <p>Built by Umar Sohail</p>
   </footer>
 
 </body>
