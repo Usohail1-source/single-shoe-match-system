@@ -1,49 +1,177 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Network Dashboard</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Mismatch</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; }
+
+    /* ── Nav ── */
+    .dash-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 60px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .dash-nav-brand {
+      font-family: var(--font-display); font-size: 16px; font-weight: 700;
+      color: var(--text-primary); letter-spacing: -0.01em;
+    }
+    .dash-nav-right { display: flex; align-items: center; gap: 16px; }
+    .dash-nav-store {
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .dash-logout {
+      font-family: var(--font-body); font-size: 13px; font-weight: 500;
+      color: var(--text-muted); text-decoration: none;
+      padding: 7px 16px; border-radius: var(--radius-xs);
+      border: 1px solid var(--border-2); transition: all 0.15s;
+    }
+    .dash-logout:hover { color: var(--text-primary); border-color: var(--border-3); background: var(--surface); }
+
+    /* ── Body ── */
+    .dash-body { flex: 1; padding: 48px 40px; max-width: 960px; width: 100%; margin: 0 auto; }
+
+    /* ── Header ── */
+    .dash-header { margin-bottom: 40px; }
+    .dash-header-tag {
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+    }
+    .dash-header h1 {
+      font-family: var(--font-display); font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700; letter-spacing: -0.03em;
+      color: var(--text-primary); line-height: 1.1;
+    }
+    .dash-header h1 span { color: var(--accent); }
+    .dash-header p {
+      font-size: 14px; color: var(--text-muted);
+      line-height: 1.7; margin-top: 10px; max-width: 480px;
+    }
+
+    /* ── Cards ── */
+    .dash-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px; margin-bottom: 40px;
+    }
+    @media (max-width: 720px) { .dash-grid { grid-template-columns: 1fr; } }
+
+    .dash-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 28px 24px;
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      transition: all 0.15s;
+      position: relative; overflow: hidden;
+    }
+    .dash-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--accent); opacity: 0; transition: opacity 0.15s;
+    }
+    .dash-card:hover {
+      border-color: var(--border-3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+    }
+    .dash-card:hover::before { opacity: 1; }
+
+    .dash-card-icon {
+      width: 36px; height: 36px; border-radius: var(--radius-xs);
+      background: rgba(200,240,80,0.08); border: 1px solid rgba(200,240,80,0.15);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 4px;
+    }
+    .dash-card h3 {
+      font-family: var(--font-body); font-size: 15px; font-weight: 600;
+      color: var(--text-primary); letter-spacing: -0.01em;
+    }
+    .dash-card p {
+      font-size: 13px; color: var(--text-muted); line-height: 1.6; flex: 1;
+    }
+    .dash-card-cta {
+      font-size: 12px; font-weight: 600; color: var(--accent);
+      letter-spacing: 0.02em; margin-top: 4px;
+    }
+
+    /* ── Footer ── */
+    .dash-footer {
+      border-top: 1px solid var(--border); padding: 0 40px; height: 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .dash-footer p {
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-faint);
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <div style="margin-bottom: 20px;">
-            <a href="/logout">Log Out</a>
-        </div>
-
-        <div class="hero">
-            <h1>Network Dashboard</h1>
-            <p>
-                Manage single shoes, view possible matches, and track activity
-                inside your current store network.
-            </p>
-        </div>
-
-        <div class="dashboard-grid">
-            <div class="dashboard-card">
-                <h3>Add a Shoe</h3>
-                <p>Submit a new left or right single shoe into this network.</p>
-                <a href="/add">Go to Add Shoe</a>
-            </div>
-
-            <div class="dashboard-card">
-                <h3>View Single Shoes</h3>
-                <p>Browse all unmatched shoes currently submitted in this network.</p>
-                <a href="/unmatched">Go to Single Shoes</a>
-            </div>
-
-            <div class="dashboard-card">
-                <h3>View Potential Matches</h3>
-                <p>Review shoes that may already have an opposite-side match waiting.</p>
-                <a href="/potential-matches">Go to Potential Matches</a>
-            </div>
-        </div>
-
-        <p class="small-note">
-            This page is now a proper network dashboard placeholder. Your live dashboard data
-            is currently rendered by <code>server.js</code>.
-        </p>
+  <nav class="dash-nav">
+    <div class="dash-nav-brand">Mismatch</div>
+    <div class="dash-nav-right">
+      <span class="dash-nav-store">Network Dashboard</span>
+      <a href="/logout" class="dash-logout">Log Out</a>
     </div>
+  </nav>
+
+  <div class="dash-body">
+
+    <div class="dash-header">
+      <div class="dash-header-tag">Mismatch Recovery System</div>
+      <h1>Welcome back.<br><span>What are we matching today?</span></h1>
+      <p>Manage your store's single shoes, find potential pairs across the network, and track recovered inventory value.</p>
+    </div>
+
+    <div class="dash-grid">
+
+      <a href="/add" class="dash-card">
+        <div class="dash-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <h3>Add a Shoe</h3>
+        <p>Submit a new left or right single shoe into the network for matching.</p>
+        <div class="dash-card-cta">Add shoe →</div>
+      </a>
+
+      <a href="/unmatched" class="dash-card">
+        <div class="dash-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </div>
+        <h3>Single Shoes</h3>
+        <p>Browse all unmatched shoes currently submitted across the network.</p>
+        <div class="dash-card-cta">View singles →</div>
+      </a>
+
+      <a href="/potential-matches" class="dash-card">
+        <div class="dash-card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
+        </div>
+        <h3>Potential Matches</h3>
+        <p>Review shoes that may have an opposite-side match waiting in the network.</p>
+        <div class="dash-card-cta">View matches →</div>
+      </a>
+
+    </div>
+
+  </div>
+
+  <footer class="dash-footer">
+    <p>© 2026 Mismatch Recovery System</p>
+    <p>Built by Umar Sohail</p>
+  </footer>
 
 </body>
 </html>
