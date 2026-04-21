@@ -168,7 +168,7 @@ function renderPage(title, bodyHtml, options) {
     const sidebar = showSidebar ? (
         '<aside class="app-sidebar">' +
         '<div class="sidebar-brand">' +
-        '<div class="sidebar-brand-name">Single Shoe Match System</div>' +
+        '<div class="sidebar-brand-name">Mismatch</div>' +
         '</div>' +
         '<nav class="sidebar-nav">' +
         '<div class="sidebar-nav-section">' +
@@ -197,7 +197,7 @@ function renderPage(title, bodyHtml, options) {
         '<html lang="en">' +
         '<head>' +
         '<meta charset="UTF-8">' +
-        '<title>' + escapeHtml(title) + ' — Single Shoe Match System</title>' +
+        '<title>' + escapeHtml(title) + ' — Mismatch</title>' +
         '<link rel="stylesheet" href="/css/style.css">' +
         '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">' +
         '</head>' +
@@ -305,7 +305,7 @@ function renderMessagePage(title, message, links, boxClass) {
     return renderPage(title,
         '<div class="hero">' +
         '<h1>' + escapeHtml(title) + '</h1>' +
-        '<p>Single Shoe Match System</p>' +
+        '<p>Mismatch/p>' +
         '</div>' +
         '<div class="' + escapeHtml(boxClass) + '">' + escapeHtml(message) + '</div>' +
         '<div class="top-links" style="margin-top: 24px;">' + linksHtml + '</div>'
