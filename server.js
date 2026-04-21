@@ -419,7 +419,7 @@ function pwPageHtml(opts) {
 
     return '<!DOCTYPE html><html lang="en"><head>' +
         '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">' +
-        '<title>Single Match</title>' +
+        '<title>Mismatch</title>' +
         '<link rel="stylesheet" href="/css/style.css">' +
         '<style>' +
         'body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:20px;}' +
@@ -548,7 +548,7 @@ app.post('/join-network', (req, res) => {
 app.get('/forgot-code', (req, res) => {
     res.send('<!DOCTYPE html><html lang="en"><head>' +
         '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">' +
-        '<title>Forgot Join Code — Single Match</title>' +
+        '<title>Forgot Join Code — Mismatch</title>' +
         '<link rel="stylesheet" href="/css/style.css">' +
         '<style>' +
         'body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:20px;}' +
